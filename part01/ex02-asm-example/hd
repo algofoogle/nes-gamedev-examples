@@ -1,0 +1,4 @@
+#!/bin/bash
+
+hexdump -C output/test.nes
+

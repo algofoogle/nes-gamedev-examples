@@ -1,0 +1,27 @@
+#!/bin/bash
+
+EMU=/cygdrive/c/gamedev/NES/FCEUX/fceux.exe
+
+mkdir -p output
+
+# Delete previous compilation artifacts and back up old test.nes:
+rm output/*.o 2> /dev/null
+mv -f output/test.nes output/test.nes.old 2> /dev/null
+
+# First, assemble main source file to an object file:
+if ca65 test.s -o output/test.o -l; then
+	# Then, link the object file into a binary, generating map.txt too.
+	# By using "-t none" we get a plain conversion to a binary file with no smarts.
+	ld65 output/test.o -m output/map.txt -o output/test.nes -C nesfile.ini
+
+	if [ "$1" == "-d" ]; then
+		hexdump -C output/test.nes
+		ls -ald output/*.nes
+	else
+		# Run what we made:
+		ls -ald output/*.nes
+		$EMU output/test.nes
+	fi
+
+fi
+
