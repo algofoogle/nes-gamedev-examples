@@ -1,3 +1,4 @@
+; This file defines a lot of NES registers and bit fields.
 
 PPU_CTRL        = $2000
 PPU_MASK        = $2001
