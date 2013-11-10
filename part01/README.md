@@ -1,9 +1,8 @@
 # part01 -- Nintendo (NES) Gamedev, part 1: Setting up
 
-At the time of writing, the contents of this `part01` directory are associated with an
-article which hasn't *yet* been published. When it **is** published, it should be found here:
+The contents of this `part01` directory are associated with the following article:
 
-* http://anton.maurovic.com/posts/nintendo-nes-gamedev-part-1-setting-up/
+*	<http://anton.maurovic.com/posts/nintendo-nes-gamedev-part-1-setting-up/>
 
 This part contains just the following:
 
