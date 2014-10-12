@@ -37,8 +37,9 @@
 
 .segment "INESHDR"
 	.byt "NES",$1A
-	.byt 1
-	.byt 1
+	.byt 1 				; 1 x 16kB PRG block.
+	.byt 1 				; 1 x 8kB CHR block.
+	; Rest of iNES header defaults to 0, indicating mapper 0, standard RAM size, etc.
 
 ; =====	Interrupt vectors ======================================================
 
@@ -58,7 +59,7 @@ screen_offset:	.res 1	; Points to the next screen offset to write.
 .segment "BSS"
 ; Put labels with .res statements here.
 
-; =====	Music ==================================================================
+; =====	Program data (read-only) ===============================================
 
 .segment "RODATA"
 
@@ -112,7 +113,7 @@ hello_msg:
 	stx APU_DMC_CTRL	; Disable DMC IRQ.
 
 	; Set stack pointer:
-	ldx $FF
+	dex 				; X = $FF
 	txs					; Stack pointer = $FF
 
 	; Clear lingering interrupts since before reset:
@@ -203,6 +204,7 @@ hello_msg:
 	; One palette (out of the 4 background palettes available) may be assigned
 	; per 2x2 group of tiles. The actual layout of the attribute table is a bit
 	; funny. See here for more info: http://wiki.nesdev.com/w/index.php/PPU_attribute_tables
+	; See also, the bottom of: http://www.thetechnickel.com/video-games/nes-development-intro
 	ldx #64
 	lda #$55			; Select palette 1 (2nd palette) throughout.
 :	sta PPU_DATA
@@ -226,7 +228,7 @@ hello_msg:
 	; DMA will halt the CPU while it copies 256 bytes from $0200-$02FF
 	; into $00-$FF of the PPU's OAM RAM.
 
-	; Set X & Y scrolling positions (0-255 and 0-239 respectively):
+	; Set X & Y scrolling positions (which have ranges of 0-255 and 0-239 respectively):
 	lda #0
 	sta PPU_SCROLL		; Write X position first.
 	sta PPU_SCROLL		; Then write Y position.
@@ -296,7 +298,7 @@ message_loop:
 	lda #$C0			; Select 1st metarow (rows 0-3; we'll then do 4-7).
 	sta PPU_ADDR
 	ldx #16				; Fill two metarows (8 bytes each)
-	lda #$55			; Lower 2 rows (bits 4-7) get palette 1, upper 2 get palette 3.
+	lda #%01010101		; Both the upper rows (bits 0-3) and the lower rows (bits 4-7) get pallete 1 (%01 x 4).
 :	sta PPU_DATA
 	dex
 	bne :-
@@ -358,7 +360,7 @@ message_done:
 	lda #$C8			; Select 2nd metarow (rows 4, 5, 6, and 7).
 	sta PPU_ADDR
 	ldx #8				; Fill just one metarow.
-	lda #$5F			; Lower 2 rows (bits 4-7) get palette 1, upper 2 get palette 3.
+	lda #%01011111		; Lower 2 rows (bits 4-7) get palette 1 (%01 x 2), upper 2 get palette 3 (%11 x 2).
 :	sta PPU_DATA
 	dex
 	bne :-
