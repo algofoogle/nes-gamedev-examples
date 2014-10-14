@@ -118,13 +118,14 @@ hello_msg:
 	dex 				; X = $FF
 	txs					; Stack pointer = $FF
 
-	; Clear WRAM; probably not strictly necessary (and creates a false
-	; sense of security) but it DOES ensure a clean state at power-on and reset.
+	; Clear WRAM, including zeropage; probably not strictly necessary
+	; (and creates a false sense of security) but it DOES ensure a clean
+	; state at power-on and reset.
 	; WRAM ("Work RAM") is the only general-purpose RAM in the NES.
 	; It is 2KiB mapped to $0000-$07FF.
 	ldx #0
 	txa
-:	sta $0000, X
+:	sta $0000, X 		; This line, in the loop, will clear zeropage.
 	sta $0100, X
 	sta $0200, X
 	sta $0300, X
@@ -152,14 +153,6 @@ hello_msg:
 :	bit PPU_STATUS		; P.V (overflow) <- bit 6 (S0 hit); P.N (negative) <- bit 7 (VBLANK).
 	bpl	:-				; Keep checking until bit 7 (VBLANK) is asserted.
 	; First PPU frame has reached VBLANK.
-
-	; Clear zeropage:
-	ldx #0
-	txa
-:	sta $00,x
-	inx
-	bne :-
-
 
 	; Move all sprites below line 240, so they're hidden.
 	; Here, we PREPARE this by loading $0200-$02FF with data that we will transfer,
@@ -347,6 +340,9 @@ message_loop:
 	sta msg_ptr
 
 	; Fix scroll position:
+	; NOTE: We have to do this after writing to VRAM, because scroll position seems
+	; to automatically track the VRAM target address. For a possible explanation of this, see:
+	; http://wiki.nesdev.com/w/index.php/The_skinny_on_NES_scrolling
 	lda #0
 	sta PPU_SCROLL		; Write X position first.
 	sta PPU_SCROLL		; Then write Y position.
@@ -435,7 +431,7 @@ repeat_message_loop:
 
 .segment "PATTERN0"
 
-	.incbin "anton.chr"
+	.incbin "anton2.chr"
 
 .segment "PATTERN1"
 
