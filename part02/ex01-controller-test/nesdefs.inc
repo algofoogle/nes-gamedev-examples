@@ -75,6 +75,19 @@ SPR_ON          = %10000    ; Show sprites.
   .endif
 .endmacro
 
+.macro ppu_scroll cx, cy
+  ; Write X position first:
+  ldx #cx
+  stx PPU_SCROLL
+  .if (cx = cy)
+    ; If they're equal, no need to "LDX" again.
+  .else
+    ldx #cy
+  .endif
+  ; Write Y position:
+  stx PPU_SCROLL
+.endmacro
+
 ; Define a palette, as a set of 3 or 4 colour indices:
 .macro  pal bb, uu, vv, ww
   .ifnblank ww
